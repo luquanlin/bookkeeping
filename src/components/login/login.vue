@@ -8,7 +8,7 @@
       </div>
       <div class="loginBox">
         <div class="loginCon">
-          <p class="title">在线学习登陆界面</p>
+          <p class="title">多人记账登陆界面</p>
           <p class="title">欢迎你的到来</p>
           <el-card shadow="always" class="login-module">
             <div slot="header" class="clearfix formTitlt">

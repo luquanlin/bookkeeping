@@ -8,7 +8,7 @@
       </div>
       <div class="loginBox-register">
         <div class="loginCon">
-          <p class="title">在线学习注册界面</p>
+          <p class="title">多人记账注册界面</p>
           <p class="title">欢迎你的加入</p>
           <el-card shadow="always" class="login-module-register">
             <div slot="header" class="clearfix formTitlt">

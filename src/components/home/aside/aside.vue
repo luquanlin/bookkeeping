@@ -2,8 +2,8 @@
   <div>
     <el-aside id="asideNav">
       <div class="logo-name">
-        <p v-if="this.$store.state.loginshow">学习</p>
-        <p v-else>在线学习系统后台管理</p>
+        <p v-if="this.$store.state.loginshow">记账</p>
+        <p v-else>多人记账系统后台管理</p>
       </div>
       <el-menu class="el-menu-vertical" 
                @open="handleOpen" 
