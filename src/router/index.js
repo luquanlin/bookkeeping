@@ -7,6 +7,9 @@ import Home from '@/components/home/home'
 import Rloe from '@/components/role/role'
 import User from '@/components/user/user'
 import Menu from '@/components/menu/menu'
+import Type from '@/components/type/type'
+import Bill from '@/components/bill/bill'
+
 Vue.use(Router)
 
 export default new Router({
@@ -33,7 +36,18 @@ export default new Router({
           name: "权限管理",
           component: Menu,
         },
-       
+        {
+          path: "/type",
+          name: "类别管理",
+          component: Type
+        },
+        {
+          path: "/bill",
+          name: "账单管理",
+          component: Bill
+        }
+
+
       ]
     },
     {
@@ -51,6 +65,6 @@ export default new Router({
       name: '五子棋',
       component: Five
     },
-    
+
   ]
 })

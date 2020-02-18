@@ -31,10 +31,22 @@
         <el-button
           size="mini"
           @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-        <el-button
+        <!-- <el-button
           size="mini"
           type="danger"
-          @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          @click="handleDelete(scope.$index, scope.row)">删除</el-button> -->
+           <el-popover
+                placement="top"
+                title="确定删除？"
+                width="200"
+                :ref="'popover-' + scope.row.id"
+                trigger="click"
+              >
+	                <div style="text-align: right; margin: 0">
+	                  <el-button type="primary" size="mini" @click="handleDelete(scope.$index, scope.row)">确定</el-button>
+	                </div>
+	                <el-button slot="reference" type="danger"  size="mini">删除</el-button>
+              </el-popover>
       </template>
     </el-table-column>
   </el-table>

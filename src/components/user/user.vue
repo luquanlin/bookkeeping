@@ -13,7 +13,7 @@
     </div>
     
   <el-table
-    :data="tables"
+    :data="tables.slice((currpage - 1) * pagesize, currpage * pagesize)"
     style="width: 100%"
     border>
     <el-table-column
@@ -45,16 +45,50 @@
         <el-button
           size="mini"
           @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-        <el-button
+        <!-- <el-button
           size="mini"
-          @click="handePassword(scope.$index, scope.row)">初始化密码</el-button>
-        <el-button
+          @click="handePassword(scope.$index, scope.row)">初始化密码</el-button> -->
+           <el-popover
+                placement="top"
+                title="确定初始化密码嘛？"
+                width="200"
+                :ref="'popover-' + scope.row.id"
+                trigger="click"
+              >
+	                <div style="text-align: right; margin: 0">
+	                  <el-button type="primary" size="mini" @click="handePassword(scope.$index, scope.row)">确定</el-button>
+	                </div>
+	                <el-button slot="reference"  size="mini">初始化密码</el-button>
+              </el-popover>
+        <!-- <el-button
           size="mini"
           type="danger"
-          @click="handleDelete(scope.$index, scope.row)">删除</el-button>
+          @click="handleDelete(scope.$index, scope.row)">删除</el-button> -->
+           <el-popover
+                placement="top"
+                title="确定删除？"
+                width="200"
+                :ref="'popover-' + scope.row.id"
+                trigger="click"
+              >
+	                <div style="text-align: right; margin: 0">
+	                  <el-button type="primary" size="mini" @click="handleDelete(scope.$index, scope.row)">确定</el-button>
+	                </div>
+	                <el-button slot="reference" type="danger"  size="mini">删除</el-button>
+              </el-popover>
       </template>
     </el-table-column>
   </el-table>
+
+  <el-pagination background 
+			layout="prev, pager, next, sizes, total, jumper"
+			:page-sizes="[5, 10, 15, 20]"
+			:page-size="pagesize"
+			:total="tables.length"
+			@current-change="handleCurrentChange"  
+			@size-change="handleSizeChange" 
+			>
+		</el-pagination>
 
   <el-dialog title="角色" :visible.sync="dialogFormVisible">
     <el-form @submit.native.prevent label-width="80px" >
@@ -111,7 +145,9 @@ export default {
       type: [],
       search: "",
       ifAccount: false,
-      registerSub: false
+      registerSub: false,
+      pagesize: 5,
+      currpage: 1,
     };
   },
   computed: {
@@ -145,6 +181,12 @@ export default {
     }
   },
   methods: {
+    handleCurrentChange(cpage) {
+      this.currpage = cpage;
+    },
+    handleSizeChange(psize) {
+      this.pagesize = psize;
+    },
     indexMethod(index) {
       return index + 1;
     },
@@ -186,7 +228,7 @@ export default {
         .then(res => {
           if (res.data.data == 1) {
             this.$message.success("初始化密码成功");
-            this.reload();
+            // this.reload();
           } else {
             this.$message.error("初始化密码失败");
           }

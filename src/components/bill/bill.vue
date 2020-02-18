@@ -2,12 +2,13 @@
 
   <div>
     <div>
-    <el-select v-model="region" filterable  placeholder="请选择角色名称" @change="selectRole()">
+     <el-input v-model="search" style="width:200px" placeholder="请输入类别名称" ></el-input>
+     <el-select v-model="region" filterable  placeholder="请选择类别类型" @change="selectRole()">
     
-        <el-option v-for="item in vagueData" :key="item.role_id" :label="item.role_name" :value="item.role_name"></el-option>
+        <el-option v-for="item in vagueData" :key="item.type_id" :label="item.type_mark==0?'支出':'收入'" :value="item.type_mark" ></el-option>
 
     </el-select>
-      <el-button type="primary" icon="el-icon-circle-plus"  @click="add">添加角色</el-button>
+      <el-button type="primary" icon="el-icon-circle-plus"  @click="add">添加类别</el-button>
     </div>
 
 
@@ -25,8 +26,13 @@
       align="center">
     </el-table-column>
     <el-table-column
-      label="角色"
-      prop="role_name"
+      label="类别类型"
+      prop="type_mark"
+      align="center" :formatter="typeMark">
+    </el-table-column>
+    <el-table-column
+      label="类别名称"
+      prop="type_name"
       align="center">
     </el-table-column>
     <el-table-column label="操作" align="center">
@@ -39,7 +45,7 @@
           size="mini"
           type="danger"
           @click="handleDelete(scope.$index, scope.row)">删除</el-button> -->
-           <el-popover
+              <el-popover
                 placement="top"
                 title="确定删除？"
                 width="200"
@@ -66,24 +72,23 @@
 			>
 		</el-pagination>
 
-  <el-dialog title="角色" :visible.sync="dialogFormVisible">
+  <el-dialog title="类别" :visible.sync="dialogFormVisible">
     <el-form @submit.native.prevent>
-    <el-form-item label="角色名称" :label-width="formLabelWidth">
-      <el-input v-model="role_name" auto-complete="off"></el-input>
+
+    <el-form-item label="类别名称" :label-width="formLabelWidth">
+      <el-input v-model="type_name" auto-complete="off"></el-input>
     </el-form-item> 
-    <el-tree
-      :data="roleDate"
-      show-checkbox
-      node-key="power_id"
-      :default-checked-keys="allPower_id"
-      :props="defaultProps"
-      ref="tree">
-       <!-- :tree-props="{children: 'listpower'}" -->
-  </el-tree>
+
+    <el-form-item label="类别类型:">
+        <el-radio-group v-model="type_mark">
+        <el-radio label="支出" ></el-radio>
+        <el-radio label="收入" ></el-radio>
+      </el-radio-group>
+    </el-form-item>
   </el-form>
   <div slot="footer" class="dialog-footer">
     <el-button @click="dialogFormVisible = false">取 消</el-button>
-    <el-button type="primary" @click="sure(role_name)">确 定</el-button>
+    <el-button type="primary" @click="sure">确 定</el-button>
   </div>
   </el-dialog>
 
@@ -114,8 +119,28 @@ export default {
         label: "power_name"
       },
       pagesize: 5,
-      currpage: 1
+      currpage: 1,
+      search: "",
+      type_mark: 0,
+      type_name: "",
+      type_id: 0
     };
+  },
+  watch: {
+    search() {
+      console.log("??", this.search);
+      this.axios
+        .post(
+          "/api/Type/selectVagueType",
+          qs.stringify({
+            type_mark: this.region,
+            type_name: this.search
+          })
+        )
+        .then(res => {
+          this.tableData = res.data.data;
+        });
+    }
   },
   methods: {
     handleCurrentChange(cpage) {
@@ -124,32 +149,33 @@ export default {
     handleSizeChange(psize) {
       this.pagesize = psize;
     },
+    typeMark(row, column) {
+      return row.type_mark == "0" ? "支出" : "收入";
+    },
     add() {
       this.dialogFormVisible = true;
-      this.role_id = 0;
-      this.role_name = "";
-      this.allPower_id = [];
-      this.axios.post("/api/Power/selectAllPower").then(res => {
-        this.roleDate = res.data.data;
-      });
+      this.type_id = 0;
+      this.type_name = "";
+      this.type_mark = "支出";
     },
     indexMethod(index) {
       return index + 1;
     },
     handleDelete(index, row) {
+      console.log("删除：", row.type_id);
       this.axios
         .post(
-          "/api/Role/updateUserRoleState",
+          "/api/Type/updateTypeState",
           qs.stringify({
-            role_id: row.role_id
+            type_id: row.type_id
           })
         )
         .then(res => {
           if (res.data.data == 1) {
-            this.$message.success("删除角色成功");
+            this.$message.success("删除类别成功");
             this.reload();
           } else {
-            this.$message.error("删除角色失败");
+            this.$message.error("删除类别失败");
           }
         })
         .catch(error => {
@@ -157,80 +183,59 @@ export default {
         });
     },
     handleEdit(index, row) {
-      this.allPower_id = [];
-      this.axios.post("/api/Power/selectAllPower").then(res => {
-        this.roleDate = res.data.data;
-      });
+      console.log("编辑:", row.type_id);
 
       this.dialogFormVisible = true;
-      this.role_name = row.role_name;
-      this.role_id = row.role_id;
-      this.axios
-        .post(
-          "/api/Role/selectRolePowers",
-          qs.stringify({
-            role_id: this.role_id
-          })
-        )
-        .then(res => {
-          this.allPower_id = res.data.data;
-        });
+      this.type_name = row.type_name;
+      this.type_mark = row.type_mark == "0" ? "支出" : "收入";
+      this.type_id = row.type_id;
     },
-    sure(name) {
-      var rad = "";
-      var ridsa = this.$refs.tree.getCheckedKeys().join(","); // 获取当前的选中的数据[数组] -id, 把数组转换成字符串
-      var ridsb = this.$refs.tree.getCheckedNodes(); // 获取当前的选中的数据{对象}
-      ridsb.forEach(ids => {
-        //获取选中的所有的父级id
-        rad += "," + ids.power_parentid;
-      });
-      rad = rad.substr(1); // 删除字符串前面的','
+    sure() {
+      var type_mark = this.type_mark == "支出" ? "0" : "1";
+      console.log("role_name", this.type_name);
+      console.log("type_mark", type_mark);
+      console.log("type_id", this.type_id);
 
-      var rids = rad + "," + ridsa;
-      var arr = rids.split(","); //  把字符串转换成数组
-      arr = [...new Set(arr)]; // 数组去重
-      rids = arr.join(","); // 把数组转换成字符串
-
-      if (this.role_id == 0) {
-        if (name == "") {
-          this.$message.error("角色名称不能为空");
+      if (this.type_id == 0) {
+        if (this.type_name == "") {
+          this.$message.error("类型名称不能为空");
         } else {
           this.axios
             .post(
-              "/api/Role/insertRoleName",
+              "/api/Type/insertType",
               qs.stringify({
-                role_name: name,
-                powers: rids
+                type_name: this.type_name,
+                type_mark: type_mark
               })
             )
             .then(res => {
               if (res.data.data == 1) {
-                this.$message.success("添加角色成功");
+                this.$message.success("添加类型成功");
                 this.reload();
               } else {
-                this.$message.error("添加角色失败");
+                this.$message.error("添加类型失败");
               }
             });
         }
       } else {
-        if (name == "") {
-          this.$message.error("角色名称不能为空");
+        if (this.type_name == "") {
+          this.$message.error("类型名称不能为空");
         } else {
           this.axios
             .post(
-              "/api/Role/updateRoleName",
+              "/api/Type/updateType",
               qs.stringify({
-                role_name: name,
-                role_id: this.role_id,
-                powers: rids
+                type_name: this.type_name,
+                type_id: this.type_id,
+                type_mark: type_mark
               })
             )
             .then(res => {
               if (res.data.data == 1) {
-                this.$message.success("修改角色成功");
+                this.$message.success("修改类型成功");
                 this.reload();
               } else {
-                this.$message.error("修改角色失败");
+                this.$message.error("修改类型失败");
               }
             });
         }
@@ -239,9 +244,10 @@ export default {
     selectRole() {
       this.axios
         .post(
-          "/api/Role/selectVagueRole",
+          "/api/Type/selectVagueType",
           qs.stringify({
-            role_name: this.region
+            type_mark: this.region,
+            type_name: this.search
           })
         )
         .then(res => {
@@ -250,7 +256,7 @@ export default {
     }
   },
   mounted() {
-    var url = "/api/Role/selectAllRole";
+    var url = "/api/Type/selectAllType";
     this.axios
       .post(url)
       .then(res => {
