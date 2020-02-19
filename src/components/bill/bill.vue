@@ -2,13 +2,8 @@
 
   <div>
     <div>
-     <el-input v-model="search" style="width:200px" placeholder="请输入类别名称" ></el-input>
-     <el-select v-model="region" filterable  placeholder="请选择类别类型" @change="selectRole()">
-    
-        <el-option v-for="item in vagueData" :key="item.type_id" :label="item.type_mark==0?'支出':'收入'" :value="item.type_mark" ></el-option>
-
-    </el-select>
-      <el-button type="primary" icon="el-icon-circle-plus"  @click="add">添加类别</el-button>
+     <el-input v-model="billUserName" style="width:200px" placeholder="请输入创建人姓名" ></el-input>
+     <el-input v-model="billName" style="width:200px" placeholder="请输入账单名称" ></el-input>
     </div>
 
 
@@ -26,37 +21,26 @@
       align="center">
     </el-table-column>
     <el-table-column
-      label="类别类型"
-      prop="type_mark"
-      align="center" :formatter="typeMark">
+      label="账单名称"
+      prop="bill_name"
+      align="center" >
     </el-table-column>
     <el-table-column
-      label="类别名称"
-      prop="type_name"
+      label="创建时间"
+      prop="bill_date"
+      align="center">
+    </el-table-column>
+     <el-table-column
+      label="创建人"
+      prop="user_name"
       align="center">
     </el-table-column>
     <el-table-column label="操作" align="center">
       <template slot-scope="scope">
         <el-button
           size="mini"
-         
-          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-        <!-- <el-button
-          size="mini"
-          type="danger"
-          @click="handleDelete(scope.$index, scope.row)">删除</el-button> -->
-              <el-popover
-                placement="top"
-                title="确定删除？"
-                width="200"
-                :ref="'popover-' + scope.row.id"
-                trigger="click"
-              >
-	                <div style="text-align: right; margin: 0">
-	                  <el-button type="primary" size="mini" @click="handleDelete(scope.$index, scope.row)">确定</el-button>
-	                </div>
-	                <el-button slot="reference" type="danger"  size="mini">删除</el-button>
-              </el-popover>
+          type="danger"  
+          @click="billDetail(scope.$index, scope.row)">查看账单详情</el-button>
       </template>
     </el-table-column>
   </el-table>
@@ -123,18 +107,50 @@ export default {
       search: "",
       type_mark: 0,
       type_name: "",
-      type_id: 0
+      type_id: 0,
+      billUserName: "",
+      billName: ""
     };
   },
   watch: {
     search() {
-      console.log("??", this.search);
+      console.log("用户名", this.billUserName);
+      console.log("账单名", this.billName);
+
+      // this.axios
+      //   .post(
+      //     "/api/Type/selectVagueType",
+      //     qs.stringify({
+      //       type_mark: this.region,
+      //       type_name: this.search
+      //     })
+      //   )
+      //   .then(res => {
+      //     this.tableData = res.data.data;
+      //   });
+    },
+    billUserName() {
+      console.log("用户名", this.billUserName);
       this.axios
         .post(
-          "/api/Type/selectVagueType",
+          "/api/Bill/selectVagueBill",
           qs.stringify({
-            type_mark: this.region,
-            type_name: this.search
+            user_name: this.billUserName,
+            bill_name: this.billName
+          })
+        )
+        .then(res => {
+          this.tableData = res.data.data;
+        });
+    },
+    billName() {
+      console.log("账单名", this.billName);
+      this.axios
+        .post(
+          "/api/Bill/selectVagueBill",
+          qs.stringify({
+            user_name: this.billUserName,
+            bill_name: this.billName
           })
         )
         .then(res => {
@@ -189,6 +205,10 @@ export default {
       this.type_name = row.type_name;
       this.type_mark = row.type_mark == "0" ? "支出" : "收入";
       this.type_id = row.type_id;
+    },
+    billDetail(index, row) {
+      console.log("账单ID:", row.bill_id);
+       this.$router.push({path:"billDetail",query:{bill_id:row.bill_id}});
     },
     sure() {
       var type_mark = this.type_mark == "支出" ? "0" : "1";
@@ -256,7 +276,7 @@ export default {
     }
   },
   mounted() {
-    var url = "/api/Type/selectAllType";
+    var url = "/api/Bill/selectAllBill";
     this.axios
       .post(url)
       .then(res => {

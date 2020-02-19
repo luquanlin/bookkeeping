@@ -9,6 +9,7 @@ import User from '@/components/user/user'
 import Menu from '@/components/menu/menu'
 import Type from '@/components/type/type'
 import Bill from '@/components/bill/bill'
+import BillDetail from '@/components/bill/billDetail/billDetail'
 
 Vue.use(Router)
 
@@ -45,6 +46,11 @@ export default new Router({
           path: "/bill",
           name: "账单管理",
           component: Bill
+        },
+        {
+          path: "/billDetail",
+          name: "账单详情",
+          component: BillDetail
         }
 
 
