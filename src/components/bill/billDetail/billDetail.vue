@@ -1,14 +1,86 @@
 <template>
-
   <div>
-    <div>
-     <el-input v-model="search" style="width:200px" placeholder="请输入类别名称" ></el-input>
-     <el-select v-model="region" filterable  placeholder="请选择类别类型" @change="selectRole()">
-    
-        <el-option v-for="item in vagueData" :key="item.type_id" :label="item.type_mark==0?'支出':'收入'" :value="item.type_mark" ></el-option>
+  <div class="billDetail">
+      <div class="biName">卢泉林的账单</div>
+      <div class="billNum">
+        <div class="top">
+          <el-table
+    :data="bill"
+    style="width: 100%"
+    border>
+     <el-table-column
+      label="创建人"
+      prop="user_name"
+      align="center">
+    </el-table-column>
+     <el-table-column
+      label="创建时间"
+      prop="bill_date"
+      align="center">
+    </el-table-column>
+    </el-table>
+          <!-- <div class="topOne">
+            创建人：
+            <el-input
+  placeholder="请输入内容"
+  v-model="bill.user_name"
+  :disabled="true"
+  style="height:0;border:none">
+</el-input>
+          </div>
+          <div class="topTwo">
+             创建时间：
+            <el-input
+  placeholder="请输入内容"
+  v-model="bill.bill_date"
+  :disabled="true"
+  style="height:0;border:none">
+</el-input>
+          </div> -->
+        </div>
+        <div class="bottom">
+          <el-table
+    :data="bill"
+    style="width: 100%"
+    border>
+     <el-table-column
+      label="账单状态"
+      prop="bill_sate"
+      align="center">
+    </el-table-column>
+     <el-table-column
+      label="账单人数"
+      prop="bill_num"
+      align="center">
+    </el-table-column>
+    </el-table>
+          <!-- <div class="bottomOne">
+             账单状态：
+            <el-input
+  placeholder="请输入内容"
+  v-model="bill.bill_sate"
+  :disabled="true"
+  style="height:0;border:none">
+</el-input>
+          </div>
+          <div class="bottomTwo">
 
-    </el-select>
-      <el-button type="primary" icon="el-icon-circle-plus"  @click="add">添加类别</el-button>
+             账单人数：
+            <el-input
+  placeholder="请输入内容"
+  v-model="bill.bill_num"
+  :disabled="true"
+  style="height:0;border:none">
+</el-input>
+          </div> -->
+        </div>
+      </div>
+      
+
+  </div>
+
+    <div>
+     <el-input v-model="search" style="width:200px" placeholder="请输入用户昵称" ></el-input>
     </div>
 
 
@@ -26,39 +98,26 @@
       align="center">
     </el-table-column>
     <el-table-column
-      label="类别类型"
-      prop="type_mark"
-      align="center" :formatter="typeMark">
-    </el-table-column>
-    <el-table-column
-      label="类别名称"
-      prop="type_name"
+      label="用户昵称"
+      prop="user_name"
       align="center">
     </el-table-column>
-    <el-table-column label="操作" align="center">
-      <template slot-scope="scope">
-        <el-button
-          size="mini"
-         
-          @click="handleEdit(scope.$index, scope.row)">编辑</el-button>
-        <!-- <el-button
-          size="mini"
-          type="danger"
-          @click="handleDelete(scope.$index, scope.row)">删除</el-button> -->
-              <el-popover
-                placement="top"
-                title="确定删除？"
-                width="200"
-                :ref="'popover-' + scope.row.id"
-                trigger="click"
-              >
-	                <div style="text-align: right; margin: 0">
-	                  <el-button type="primary" size="mini" @click="handleDelete(scope.$index, scope.row)">确定</el-button>
-	                </div>
-	                <el-button slot="reference" type="danger"  size="mini">删除</el-button>
-              </el-popover>
-      </template>
+    <el-table-column
+      label="用户性别"
+      prop="user_sex"
+      align="center">
     </el-table-column>
+    <el-table-column
+      label="加入时间"
+      prop="buser_time"
+      align="center">
+    </el-table-column>
+    <el-table-column
+      label="加入状态"
+      prop="buser_if"
+      align="center" :formatter="buserIf">
+    </el-table-column>
+   
   </el-table>
 
    <!-- 分页 -->
@@ -104,6 +163,8 @@ export default {
   inject: ["reload"],
   data() {
     return {
+      bill_id: 0,
+      bill: [],
       allPower_id: [],
       roleDate: [],
       vagueData: [],
@@ -141,10 +202,10 @@ export default {
       console.log("??", this.search);
       this.axios
         .post(
-          "/api/Type/selectVagueType",
+          "/api/Bill/selectVagueBillDetail",
           qs.stringify({
-            type_mark: this.region,
-            type_name: this.search
+            bill_id: this.bill_id,
+            user_name: this.search
           })
         )
         .then(res => {
@@ -161,6 +222,9 @@ export default {
     },
     typeMark(row, column) {
       return row.type_mark == "0" ? "支出" : "收入";
+    },
+    buserIf: function(row, column) {
+      return row.buser_if == "1" ? "已进入" : "已退出";
     },
     add() {
       this.dialogFormVisible = true;
@@ -266,11 +330,26 @@ export default {
     }
   },
   mounted() {
-    var url = "/api/Type/selectAllType";
+    this.bill_id = this.$route.query.bill_id;
+    var url = "/api/Bill/selectBillDetail";
     this.axios
-      .post(url)
+      .post(
+        url,
+        qs.stringify({
+          bill_id: this.bill_id
+        })
+      )
       .then(res => {
+        var result = res.data.data;
         this.tableData = res.data.data;
+        this.bill = [
+          {
+            user_name: result[0].bill_name,
+            bill_date: result[0].bill_date,
+            bill_sate: result[0].bill_state == 1 ? "存在" : "已删除",
+            bill_num: result.length
+          }
+        ];
       })
       .catch(error => {});
   }
@@ -279,4 +358,43 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style lang="scss" scoped>
+.billDetail {
+  width: 100%;
+  // height: 400px;
+  border: 2px solid #03152a;
+  margin-bottom: 20px;
+  //  background: rgb(226, 225, 231);
+}
+.biName {
+  width: 100%;
+  height: 20%;
+  font-size: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 20px 0;
+}
+.billNum {
+  height: 80%;
+
+  // padding: 2%;
+}
+.top {
+  height: 50%;
+  display: flex;
+}
+.top div {
+  width: 50%;
+  height: 100%;
+  border-top: 1px solid #03152a;
+}
+.bottom {
+  height: 50%;
+  display: flex;
+}
+.bottom div {
+  width: 50%;
+  height: 100%;
+  border-top: 1px solid #919599;
+}
 </style>

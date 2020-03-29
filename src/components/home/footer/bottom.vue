@@ -1,6 +1,6 @@
 <template>
   <div>
-    <p>卢泉林 &nbsp; 2019-10-29 &nbsp; 在线学习系统</p>
+    <p>卢泉林 &nbsp; 多人记账管理系统</p>
   </div>
 </template>
 

@@ -69,7 +69,7 @@ export default {
           )
           .then(res => {
             if (res.data.data == 1) {
-              this.$router.push({ path: "/" });
+              this.$router.push({ path: "/analysis" });
             } else if (res.data.data == 2) {
               this.$router.push({ path: "/watch" });
             } else {

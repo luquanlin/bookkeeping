@@ -10,6 +10,7 @@ import Menu from '@/components/menu/menu'
 import Type from '@/components/type/type'
 import Bill from '@/components/bill/bill'
 import BillDetail from '@/components/bill/billDetail/billDetail'
+import Analysis from '@/components/analysis/analysis'
 
 Vue.use(Router)
 
@@ -51,6 +52,11 @@ export default new Router({
           path: "/billDetail",
           name: "账单详情",
           component: BillDetail
+        },
+        {
+          path: "/analysis",
+          name: "账单详情",
+          component: Analysis
         }
 
 
