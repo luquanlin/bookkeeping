@@ -32,3 +32,4 @@ For a detailed explanation on how things work, check out the [guide](http://vuej
 此为多人记账系统前端，使用的框架为Vue.js+ElementUI,使用了vue-cli安装，集合了webpack打包工具。
 
 请配合后台使用，后台网址：https://github.com/luquanlin/bookkeepingJava
+微信小程序地址：https://github.com/luquanlin/bookkeepingWX
